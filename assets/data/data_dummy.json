@@ -1,0 +1,81 @@
+{
+  "Geografi": [
+    {
+      "nama": "Nama Tabel A",
+      "data": [
+        [
+          "Kecamatan",
+          "Tahun",
+          "Nilai"
+        ],
+        [
+          "Kec. A",
+          "2022",
+          "120"
+        ],
+        [
+          "Kec. B",
+          "2022",
+          "150"
+        ],
+        [
+          "Kec. C",
+          "2022",
+          "170"
+        ]
+      ]
+    },
+    {
+      "nama": "Nama Tabel B",
+      "data": [
+        [
+          "Kecamatan",
+          "Tahun",
+          "Nilai"
+        ],
+        [
+          "Kec. A",
+          "2023",
+          "130"
+        ],
+        [
+          "Kec. B",
+          "2023",
+          "155"
+        ],
+        [
+          "Kec. C",
+          "2023",
+          "180"
+        ]
+      ]
+    }
+  ],
+  "Pemerintahan": [
+    {
+      "nama": "Data APBD",
+      "data": [
+        [
+          "Kecamatan",
+          "Tahun",
+          "APBD"
+        ],
+        [
+          "Kec. A",
+          "2022",
+          "200M"
+        ],
+        [
+          "Kec. B",
+          "2022",
+          "180M"
+        ],
+        [
+          "Kec. C",
+          "2022",
+          "220M"
+        ]
+      ]
+    }
+  ]
+}

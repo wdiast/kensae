@@ -1,0 +1,716 @@
+name: kensae
+description: "Kendal Satu Data dari Desa"
+# The following line prevents the package from being accidentally published to
+# pub.dev using `flutter pub publish`. This is preferred for private packages.
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+# The following defines the version and build number for your application.
+# A version number is three numbers separated by dots, like 1.2.43
+# followed by an optional build number separated by a +.
+# Both the version and the builder number may be overridden in flutter
+# build by specifying --build-name and --build-number, respectively.
+# In Android, build-name is used as versionName while build-number used as versionCode.
+# Read more about Android versioning at https://developer.android.com/studio/publish/versioning
+# In iOS, build-name is used as CFBundleShortVersionString while build-number is used as CFBundleVersion.
+# Read more about iOS versioning at
+# https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
+# In Windows, build-name is used as the major, minor, and patch parts
+# of the product and file versions while build-number is used as the build suffix.
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.8.1
+
+# Dependencies specify other packages that your package needs in order to work.
+# To automatically upgrade your package dependencies to the latest versions
+# consider running `flutter pub upgrade --major-versions`. Alternatively,
+# dependencies can be manually updated by changing the version numbers below to
+# the latest version available on pub.dev. To see which dependencies have newer
+# versions available, run `flutter pub outdated`.
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_pdfview: ^1.4.0+1
+  path_provider: ^2.1.5
+  dropdown_button2: ^2.3.9
+  flutter_map: ^4.0.0
+  latlong2: ^0.8.1
+  geojson: ^1.0.0
+  http: ^0.13.6
+  csv: ^6.0.0
+  permission_handler: ^11.0.1
+  syncfusion_flutter_xlsio: ^30.1.37
+  syncfusion_flutter_datagrid: ^30.1.37
+
+  # The following adds the Cupertino Icons font to your application.
+  # Use with the CupertinoIcons class for iOS style icons.
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_launcher_icons: ^0.13.1
+  flutter_native_splash: ^2.4.6
+  flutter_lints: ^5.0.0
+
+flutter_icons:
+  android: true
+  ios: false
+  image_path: "assets/img/frontlogo.png"
+
+flutter_native_splash:
+  color: "#CFE9FD"
+  image: assets/img/frontlogo.png # Gambar logo splash screen
+  android: true
+  ios: false
+  fullscreen: true
+
+  # The "flutter_lints" package below contains a set of recommended lints to
+  # encourage good coding practices. The lint set provided by the package is
+  # activated in the `analysis_options.yaml` file located at the root of your
+  # package. See that file for information about deactivating specific lint
+  # rules and activating additional ones.
+
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
+
+# The following section is specific to Flutter packages.
+flutter:
+
+  # The following line ensures that the Material Icons font is
+  # included with your application, so that you can use the icons in
+  # the material Icons class.
+  uses-material-design: true
+
+# To add assets to your application, add an assets section, like this:
+  assets:
+    - assets/img/logo.png
+    - assets/img/LogoBPS.png
+    - assets/img/Footer.png
+    - assets/img/kecamatan/kecweleri.png
+    - assets/img/kecamatan/keckendal.png
+    - assets/img/desa/podes2024.png
+    - assets/pdf/statistik-potensi-desa-kabupaten-kendal-2024.pdf
+    - assets/pdf/kecamatan-kota-kendal-dalam-angka-2024.pdf
+    - assets/pdf/kecamatan-weleri-dalam-angka-2024.pdf
+    - assets/data/data_dummy.json
+    - assets/map/3324_kec.geojson
+    - assets/map/3324010001_sls.geojson
+    - assets/map/3324010002.geojson
+    - assets/map/3324010002_sls.geojson
+    - assets/map/3324010003.geojson
+    - assets/map/3324010003_sls.geojson
+    - assets/map/3324010004.geojson
+    - assets/map/3324010004_sls.geojson
+    - assets/map/3324010005.geojson
+    - assets/map/3324010005_sls.geojson
+    - assets/map/3324010006.geojson
+    - assets/map/3324010006_sls.geojson
+    - assets/map/3324010007.geojson
+    - assets/map/3324010007_sls.geojson
+    - assets/map/3324010008.geojson
+    - assets/map/3324010008_sls.geojson
+    - assets/map/3324010009.geojson
+    - assets/map/3324010009_sls.geojson
+    - assets/map/3324010010.geojson
+    - assets/map/3324010010_sls.geojson
+    - assets/map/3324010011.geojson
+    - assets/map/3324010011_sls.geojson
+    - assets/map/3324010012.geojson
+    - assets/map/3324010012_sls.geojson
+    - assets/map/3324010_desa.geojson
+    - assets/map/3324020001.geojson
+    - assets/map/3324020001_sls.geojson
+    - assets/map/3324020002.geojson
+    - assets/map/3324020002_sls.geojson
+    - assets/map/3324020003.geojson
+    - assets/map/3324020003_sls.geojson
+    - assets/map/3324020004.geojson
+    - assets/map/3324020004_sls.geojson
+    - assets/map/3324020005.geojson
+    - assets/map/3324020005_sls.geojson
+    - assets/map/3324020006.geojson
+    - assets/map/3324020006_sls.geojson
+    - assets/map/3324020007.geojson
+    - assets/map/3324020007_sls.geojson
+    - assets/map/3324020008.geojson
+    - assets/map/3324020008_sls.geojson
+    - assets/map/3324020009.geojson
+    - assets/map/3324020009_sls.geojson
+    - assets/map/3324020010.geojson
+    - assets/map/3324020010_sls.geojson
+    - assets/map/3324020011.geojson
+    - assets/map/3324020011_sls.geojson
+    - assets/map/3324020012.geojson
+    - assets/map/3324020012_sls.geojson
+    - assets/map/3324020013.geojson
+    - assets/map/3324020013_sls.geojson
+    - assets/map/3324020014.geojson
+    - assets/map/3324020014_sls.geojson
+    - assets/map/3324020015.geojson
+    - assets/map/3324020015_sls.geojson
+    - assets/map/3324020016.geojson
+    - assets/map/3324020016_sls.geojson
+    - assets/map/3324020017.geojson
+    - assets/map/3324020017_sls.geojson
+    - assets/map/3324020018.geojson
+    - assets/map/3324020018_sls.geojson
+    - assets/map/3324020_desa.geojson
+    - assets/map/3324030001.geojson
+    - assets/map/3324030001_sls.geojson
+    - assets/map/3324030002.geojson
+    - assets/map/3324030002_sls.geojson
+    - assets/map/3324030003.geojson
+    - assets/map/3324030003_sls.geojson
+    - assets/map/3324030004.geojson
+    - assets/map/3324030004_sls.geojson
+    - assets/map/3324030005.geojson
+    - assets/map/3324030005_sls.geojson
+    - assets/map/3324030006.geojson
+    - assets/map/3324030006_sls.geojson
+    - assets/map/3324030007.geojson
+    - assets/map/3324030007_sls.geojson
+    - assets/map/3324030008.geojson
+    - assets/map/3324030008_sls.geojson
+    - assets/map/3324030009.geojson
+    - assets/map/3324030009_sls.geojson
+    - assets/map/3324030010.geojson
+    - assets/map/3324030010_sls.geojson
+    - assets/map/3324030011.geojson
+    - assets/map/3324030011_sls.geojson
+    - assets/map/3324030012.geojson
+    - assets/map/3324030012_sls.geojson
+    - assets/map/3324030013.geojson
+    - assets/map/3324030013_sls.geojson
+    - assets/map/3324030014.geojson
+    - assets/map/3324030014_sls.geojson
+    - assets/map/3324030_desa.geojson
+    - assets/map/3324040001.geojson
+    - assets/map/3324040001_sls.geojson
+    - assets/map/3324040002.geojson
+    - assets/map/3324040002_sls.geojson
+    - assets/map/3324040003.geojson
+    - assets/map/3324040003_sls.geojson
+    - assets/map/3324040004.geojson
+    - assets/map/3324040004_sls.geojson
+    - assets/map/3324040005.geojson
+    - assets/map/3324040005_sls.geojson
+    - assets/map/3324040006.geojson
+    - assets/map/3324040006_sls.geojson
+    - assets/map/3324040007.geojson
+    - assets/map/3324040007_sls.geojson
+    - assets/map/3324040008.geojson
+    - assets/map/3324040008_sls.geojson
+    - assets/map/3324040009.geojson
+    - assets/map/3324040009_sls.geojson
+    - assets/map/3324040010.geojson
+    - assets/map/3324040010_sls.geojson
+    - assets/map/3324040011.geojson
+    - assets/map/3324040011_sls.geojson
+    - assets/map/3324040012.geojson
+    - assets/map/3324040012_sls.geojson
+    - assets/map/3324040013.geojson
+    - assets/map/3324040013_sls.geojson
+    - assets/map/3324040014.geojson
+    - assets/map/3324040014_sls.geojson
+    - assets/map/3324040_desa.geojson
+    - assets/map/3324050001.geojson
+    - assets/map/3324050001_sls.geojson
+    - assets/map/3324050002.geojson
+    - assets/map/3324050002_sls.geojson
+    - assets/map/3324050003.geojson
+    - assets/map/3324050003_sls.geojson
+    - assets/map/3324050004.geojson
+    - assets/map/3324050004_sls.geojson
+    - assets/map/3324050005.geojson
+    - assets/map/3324050005_sls.geojson
+    - assets/map/3324050006.geojson
+    - assets/map/3324050006_sls.geojson
+    - assets/map/3324050007.geojson
+    - assets/map/3324050007_sls.geojson
+    - assets/map/3324050008.geojson
+    - assets/map/3324050008_sls.geojson
+    - assets/map/3324050009.geojson
+    - assets/map/3324050009_sls.geojson
+    - assets/map/3324050010.geojson
+    - assets/map/3324050010_sls.geojson
+    - assets/map/3324050011.geojson
+    - assets/map/3324050011_sls.geojson
+    - assets/map/3324050012.geojson
+    - assets/map/3324050012_sls.geojson
+    - assets/map/3324050013.geojson
+    - assets/map/3324050013_sls.geojson
+    - assets/map/3324050_desa.geojson
+    - assets/map/3324060001.geojson
+    - assets/map/3324060001_sls.geojson
+    - assets/map/3324060002.geojson
+    - assets/map/3324060002_sls.geojson
+    - assets/map/3324060003.geojson
+    - assets/map/3324060003_sls.geojson
+    - assets/map/3324060004.geojson
+    - assets/map/3324060004_sls.geojson
+    - assets/map/3324060005.geojson
+    - assets/map/3324060005_sls.geojson
+    - assets/map/3324060006.geojson
+    - assets/map/3324060006_sls.geojson
+    - assets/map/3324060007.geojson
+    - assets/map/3324060007_sls.geojson
+    - assets/map/3324060008.geojson
+    - assets/map/3324060008_sls.geojson
+    - assets/map/3324060009.geojson
+    - assets/map/3324060009_sls.geojson
+    - assets/map/3324060010.geojson
+    - assets/map/3324060010_sls.geojson
+    - assets/map/3324060011.geojson
+    - assets/map/3324060011_sls.geojson
+    - assets/map/3324060012.geojson
+    - assets/map/3324060012_sls.geojson
+    - assets/map/3324060013.geojson
+    - assets/map/3324060013_sls.geojson
+    - assets/map/3324060014.geojson
+    - assets/map/3324060014_sls.geojson
+    - assets/map/3324060015.geojson
+    - assets/map/3324060015_sls.geojson
+    - assets/map/3324060016.geojson
+    - assets/map/3324060016_sls.geojson
+    - assets/map/3324060_desa.geojson
+    - assets/map/3324070001.geojson
+    - assets/map/3324070001_sls.geojson
+    - assets/map/3324070002.geojson
+    - assets/map/3324070002_sls.geojson
+    - assets/map/3324070003.geojson
+    - assets/map/3324070003_sls.geojson
+    - assets/map/3324070004.geojson
+    - assets/map/3324070004_sls.geojson
+    - assets/map/3324070005.geojson
+    - assets/map/3324070005_sls.geojson
+    - assets/map/3324070006.geojson
+    - assets/map/3324070006_sls.geojson
+    - assets/map/3324070007.geojson
+    - assets/map/3324070007_sls.geojson
+    - assets/map/3324070008.geojson
+    - assets/map/3324070008_sls.geojson
+    - assets/map/3324070009.geojson
+    - assets/map/3324070009_sls.geojson
+    - assets/map/3324070010.geojson
+    - assets/map/3324070010_sls.geojson
+    - assets/map/3324070011.geojson
+    - assets/map/3324070011_sls.geojson
+    - assets/map/3324070012.geojson
+    - assets/map/3324070012_sls.geojson
+    - assets/map/3324070013.geojson
+    - assets/map/3324070013_sls.geojson
+    - assets/map/3324070014.geojson
+    - assets/map/3324070014_sls.geojson
+    - assets/map/3324070015.geojson
+    - assets/map/3324070015_sls.geojson
+    - assets/map/3324070016.geojson
+    - assets/map/3324070016_sls.geojson
+    - assets/map/3324070017.geojson
+    - assets/map/3324070017_sls.geojson
+    - assets/map/3324070018.geojson
+    - assets/map/3324070018_sls.geojson
+    - assets/map/3324070_desa.geojson
+    - assets/map/3324080007.geojson
+    - assets/map/3324080007_sls.geojson
+    - assets/map/3324080008.geojson
+    - assets/map/3324080008_sls.geojson
+    - assets/map/3324080009.geojson
+    - assets/map/3324080009_sls.geojson
+    - assets/map/3324080010.geojson
+    - assets/map/3324080010_sls.geojson
+    - assets/map/3324080011.geojson
+    - assets/map/3324080011_sls.geojson
+    - assets/map/3324080012.geojson
+    - assets/map/3324080012_sls.geojson
+    - assets/map/3324080013.geojson
+    - assets/map/3324080013_sls.geojson
+    - assets/map/3324080014.geojson
+    - assets/map/3324080014_sls.geojson
+    - assets/map/3324080015.geojson
+    - assets/map/3324080015_sls.geojson
+    - assets/map/3324080_desa.geojson
+    - assets/map/3324081001.geojson
+    - assets/map/3324081001_sls.geojson
+    - assets/map/3324081002.geojson
+    - assets/map/3324081002_sls.geojson
+    - assets/map/3324081003.geojson
+    - assets/map/3324081003_sls.geojson
+    - assets/map/3324081004.geojson
+    - assets/map/3324081004_sls.geojson
+    - assets/map/3324081005.geojson
+    - assets/map/3324081005_sls.geojson
+    - assets/map/3324081006.geojson
+    - assets/map/3324081006_sls.geojson
+    - assets/map/3324081007.geojson
+    - assets/map/3324081007_sls.geojson
+    - assets/map/3324081008.geojson
+    - assets/map/3324081008_sls.geojson
+    - assets/map/3324081_desa.geojson
+    - assets/map/3324090001.geojson
+    - assets/map/3324090001_sls.geojson
+    - assets/map/3324090002.geojson
+    - assets/map/3324090002_sls.geojson
+    - assets/map/3324090003.geojson
+    - assets/map/3324090003_sls.geojson
+    - assets/map/3324090004.geojson
+    - assets/map/3324090004_sls.geojson
+    - assets/map/3324090005.geojson
+    - assets/map/3324090005_sls.geojson
+    - assets/map/3324090006.geojson
+    - assets/map/3324090006_sls.geojson
+    - assets/map/3324090007.geojson
+    - assets/map/3324090007_sls.geojson
+    - assets/map/3324090008.geojson
+    - assets/map/3324090008_sls.geojson
+    - assets/map/3324090009.geojson
+    - assets/map/3324090009_sls.geojson
+    - assets/map/3324090010.geojson
+    - assets/map/3324090010_sls.geojson
+    - assets/map/3324090011.geojson
+    - assets/map/3324090011_sls.geojson
+    - assets/map/3324090012.geojson
+    - assets/map/3324090012_sls.geojson
+    - assets/map/3324090_desa.geojson
+    - assets/map/3324100001.geojson
+    - assets/map/3324100001_sls.geojson
+    - assets/map/3324100002.geojson
+    - assets/map/3324100002_sls.geojson
+    - assets/map/3324100003.geojson
+    - assets/map/3324100003_sls.geojson
+    - assets/map/3324100008.geojson
+    - assets/map/3324100008_sls.geojson
+    - assets/map/3324100009.geojson
+    - assets/map/3324100009_sls.geojson
+    - assets/map/3324100010.geojson
+    - assets/map/3324100010_sls.geojson
+    - assets/map/3324100011.geojson
+    - assets/map/3324100011_sls.geojson
+    - assets/map/3324100012.geojson
+    - assets/map/3324100012_sls.geojson
+    - assets/map/3324100021.geojson
+    - assets/map/3324100021_sls.geojson
+    - assets/map/3324100022.geojson
+    - assets/map/3324100022_sls.geojson
+    - assets/map/3324100023.geojson
+    - assets/map/3324100023_sls.geojson
+    - assets/map/3324100024.geojson
+    - assets/map/3324100024_sls.geojson
+    - assets/map/3324100_desa.geojson
+    - assets/map/3324101001.geojson
+    - assets/map/3324101001_sls.geojson
+    - assets/map/3324101002.geojson
+    - assets/map/3324101002_sls.geojson
+    - assets/map/3324101003.geojson
+    - assets/map/3324101003_sls.geojson
+    - assets/map/3324101004.geojson
+    - assets/map/3324101004_sls.geojson
+    - assets/map/3324101005.geojson
+    - assets/map/3324101005_sls.geojson
+    - assets/map/3324101006.geojson
+    - assets/map/3324101006_sls.geojson
+    - assets/map/3324101007.geojson
+    - assets/map/3324101007_sls.geojson
+    - assets/map/3324101008.geojson
+    - assets/map/3324101008_sls.geojson
+    - assets/map/3324101009.geojson
+    - assets/map/3324101009_sls.geojson
+    - assets/map/3324101010.geojson
+    - assets/map/3324101010_sls.geojson
+    - assets/map/3324101011.geojson
+    - assets/map/3324101011_sls.geojson
+    - assets/map/3324101012.geojson
+    - assets/map/3324101012_sls.geojson
+    - assets/map/3324101_desa.geojson
+    - assets/map/3324110003.geojson
+    - assets/map/3324110003_sls.geojson
+    - assets/map/3324110004.geojson
+    - assets/map/3324110004_sls.geojson
+    - assets/map/3324110005.geojson
+    - assets/map/3324110005_sls.geojson
+    - assets/map/3324110012.geojson
+    - assets/map/3324110012_sls.geojson
+    - assets/map/3324110013.geojson
+    - assets/map/3324110013_sls.geojson
+    - assets/map/3324110018.geojson
+    - assets/map/3324110018_sls.geojson
+    - assets/map/3324110019.geojson
+    - assets/map/3324110019_sls.geojson
+    - assets/map/3324110020.geojson
+    - assets/map/3324110020_sls.geojson
+    - assets/map/3324110021.geojson
+    - assets/map/3324110021_sls.geojson
+    - assets/map/3324110022.geojson
+    - assets/map/3324110022_sls.geojson
+    - assets/map/3324110023.geojson
+    - assets/map/3324110023_sls.geojson
+    - assets/map/3324110024.geojson
+    - assets/map/3324110024_sls.geojson
+    - assets/map/3324110025.geojson
+    - assets/map/3324110025_sls.geojson
+    - assets/map/3324110026.geojson
+    - assets/map/3324110026_sls.geojson
+    - assets/map/3324110027.geojson
+    - assets/map/3324110027_sls.geojson
+    - assets/map/3324110028.geojson
+    - assets/map/3324110028_sls.geojson
+    - assets/map/3324110_desa.geojson
+    - assets/map/3324111001.geojson
+    - assets/map/3324111001_sls.geojson
+    - assets/map/3324111002.geojson
+    - assets/map/3324111002_sls.geojson
+    - assets/map/3324111003.geojson
+    - assets/map/3324111003_sls.geojson
+    - assets/map/3324111004.geojson
+    - assets/map/3324111004_sls.geojson
+    - assets/map/3324111005.geojson
+    - assets/map/3324111005_sls.geojson
+    - assets/map/3324111006.geojson
+    - assets/map/3324111006_sls.geojson
+    - assets/map/3324111007.geojson
+    - assets/map/3324111007_sls.geojson
+    - assets/map/3324111008.geojson
+    - assets/map/3324111008_sls.geojson
+    - assets/map/3324111009.geojson
+    - assets/map/3324111009_sls.geojson
+    - assets/map/3324111010.geojson
+    - assets/map/3324111010_sls.geojson
+    - assets/map/3324111011.geojson
+    - assets/map/3324111011_sls.geojson
+    - assets/map/3324111012.geojson
+    - assets/map/3324111012_sls.geojson
+    - assets/map/3324111_desa.geojson
+    - assets/map/3324120001.geojson
+    - assets/map/3324120001_sls.geojson
+    - assets/map/3324120002.geojson
+    - assets/map/3324120002_sls.geojson
+    - assets/map/3324120003.geojson
+    - assets/map/3324120003_sls.geojson
+    - assets/map/3324120004.geojson
+    - assets/map/3324120004_sls.geojson
+    - assets/map/3324120005.geojson
+    - assets/map/3324120005_sls.geojson
+    - assets/map/3324120006.geojson
+    - assets/map/3324120006_sls.geojson
+    - assets/map/3324120007.geojson
+    - assets/map/3324120007_sls.geojson
+    - assets/map/3324120008.geojson
+    - assets/map/3324120008_sls.geojson
+    - assets/map/3324120009.geojson
+    - assets/map/3324120009_sls.geojson
+    - assets/map/3324120010.geojson
+    - assets/map/3324120010_sls.geojson
+    - assets/map/3324120011.geojson
+    - assets/map/3324120011_sls.geojson
+    - assets/map/3324120012.geojson
+    - assets/map/3324120012_sls.geojson
+    - assets/map/3324120013.geojson
+    - assets/map/3324120013_sls.geojson
+    - assets/map/3324120014.geojson
+    - assets/map/3324120014_sls.geojson
+    - assets/map/3324120015.geojson
+    - assets/map/3324120015_sls.geojson
+    - assets/map/3324120016.geojson
+    - assets/map/3324120016_sls.geojson
+    - assets/map/3324120_desa.geojson
+    - assets/map/3324130001.geojson
+    - assets/map/3324130001_sls.geojson
+    - assets/map/3324130002.geojson
+    - assets/map/3324130002_sls.geojson
+    - assets/map/3324130003.geojson
+    - assets/map/3324130003_sls.geojson
+    - assets/map/3324130004.geojson
+    - assets/map/3324130004_sls.geojson
+    - assets/map/3324130005.geojson
+    - assets/map/3324130005_sls.geojson
+    - assets/map/3324130006.geojson
+    - assets/map/3324130006_sls.geojson
+    - assets/map/3324130007.geojson
+    - assets/map/3324130007_sls.geojson
+    - assets/map/3324130008.geojson
+    - assets/map/3324130008_sls.geojson
+    - assets/map/3324130009.geojson
+    - assets/map/3324130009_sls.geojson
+    - assets/map/3324130010.geojson
+    - assets/map/3324130010_sls.geojson
+    - assets/map/3324130011.geojson
+    - assets/map/3324130011_sls.geojson
+    - assets/map/3324130012.geojson
+    - assets/map/3324130012_sls.geojson
+    - assets/map/3324130013.geojson
+    - assets/map/3324130013_sls.geojson
+    - assets/map/3324130014.geojson
+    - assets/map/3324130014_sls.geojson
+    - assets/map/3324130015.geojson
+    - assets/map/3324130015_sls.geojson
+    - assets/map/3324130016.geojson
+    - assets/map/3324130016_sls.geojson
+    - assets/map/3324130_desa.geojson
+    - assets/map/3324140001.geojson
+    - assets/map/3324140001_sls.geojson
+    - assets/map/3324140002.geojson
+    - assets/map/3324140002_sls.geojson
+    - assets/map/3324140003.geojson
+    - assets/map/3324140003_sls.geojson
+    - assets/map/3324140004.geojson
+    - assets/map/3324140004_sls.geojson
+    - assets/map/3324140005.geojson
+    - assets/map/3324140005_sls.geojson
+    - assets/map/3324140006.geojson
+    - assets/map/3324140006_sls.geojson
+    - assets/map/3324140007.geojson
+    - assets/map/3324140007_sls.geojson
+    - assets/map/3324140008.geojson
+    - assets/map/3324140008_sls.geojson
+    - assets/map/3324140009.geojson
+    - assets/map/3324140009_sls.geojson
+    - assets/map/3324140010.geojson
+    - assets/map/3324140010_sls.geojson
+    - assets/map/3324140011.geojson
+    - assets/map/3324140011_sls.geojson
+    - assets/map/3324140012.geojson
+    - assets/map/3324140012_sls.geojson
+    - assets/map/3324140013.geojson
+    - assets/map/3324140013_sls.geojson
+    - assets/map/3324140014.geojson
+    - assets/map/3324140014_sls.geojson
+    - assets/map/3324140015.geojson
+    - assets/map/3324140015_sls.geojson
+    - assets/map/3324140_desa.geojson
+    - assets/map/3324150001.geojson
+    - assets/map/3324150001_sls.geojson
+    - assets/map/3324150002.geojson
+    - assets/map/3324150002_sls.geojson
+    - assets/map/3324150003.geojson
+    - assets/map/3324150003_sls.geojson
+    - assets/map/3324150004.geojson
+    - assets/map/3324150004_sls.geojson
+    - assets/map/3324150005.geojson
+    - assets/map/3324150005_sls.geojson
+    - assets/map/3324150006.geojson
+    - assets/map/3324150006_sls.geojson
+    - assets/map/3324150007.geojson
+    - assets/map/3324150007_sls.geojson
+    - assets/map/3324150008.geojson
+    - assets/map/3324150008_sls.geojson
+    - assets/map/3324150009.geojson
+    - assets/map/3324150009_sls.geojson
+    - assets/map/3324150010.geojson
+    - assets/map/3324150010_sls.geojson
+    - assets/map/3324150011.geojson
+    - assets/map/3324150011_sls.geojson
+    - assets/map/3324150012.geojson
+    - assets/map/3324150012_sls.geojson
+    - assets/map/3324150013.geojson
+    - assets/map/3324150013_sls.geojson
+    - assets/map/3324150014.geojson
+    - assets/map/3324150014_sls.geojson
+    - assets/map/3324150015.geojson
+    - assets/map/3324150015_sls.geojson
+    - assets/map/3324150_desa.geojson
+    - assets/map/3324160001.geojson
+    - assets/map/3324160001_sls.geojson
+    - assets/map/3324160002.geojson
+    - assets/map/3324160002_sls.geojson
+    - assets/map/3324160003.geojson
+    - assets/map/3324160003_sls.geojson
+    - assets/map/3324160004.geojson
+    - assets/map/3324160004_sls.geojson
+    - assets/map/3324160005.geojson
+    - assets/map/3324160005_sls.geojson
+    - assets/map/3324160006.geojson
+    - assets/map/3324160006_sls.geojson
+    - assets/map/3324160007.geojson
+    - assets/map/3324160007_sls.geojson
+    - assets/map/3324160008.geojson
+    - assets/map/3324160008_sls.geojson
+    - assets/map/3324160009.geojson
+    - assets/map/3324160009_sls.geojson
+    - assets/map/3324160010.geojson
+    - assets/map/3324160010_sls.geojson
+    - assets/map/3324160011.geojson
+    - assets/map/3324160011_sls.geojson
+    - assets/map/3324160012.geojson
+    - assets/map/3324160012_sls.geojson
+    - assets/map/3324160013.geojson
+    - assets/map/3324160013_sls.geojson
+    - assets/map/3324160014.geojson
+    - assets/map/3324160014_sls.geojson
+    - assets/map/3324160015.geojson
+    - assets/map/3324160015_sls.geojson
+    - assets/map/3324160016.geojson
+    - assets/map/3324160016_sls.geojson
+    - assets/map/3324160017.geojson
+    - assets/map/3324160017_sls.geojson
+    - assets/map/3324160018.geojson
+    - assets/map/3324160018_sls.geojson
+    - assets/map/3324160_desa.geojson
+    - assets/map/3324170001.geojson
+    - assets/map/3324170001_sls.geojson
+    - assets/map/3324170002.geojson
+    - assets/map/3324170002_sls.geojson
+    - assets/map/3324170003.geojson
+    - assets/map/3324170003_sls.geojson
+    - assets/map/3324170004.geojson
+    - assets/map/3324170004_sls.geojson
+    - assets/map/3324170005.geojson
+    - assets/map/3324170005_sls.geojson
+    - assets/map/3324170006.geojson
+    - assets/map/3324170006_sls.geojson
+    - assets/map/3324170007.geojson
+    - assets/map/3324170007_sls.geojson
+    - assets/map/3324170008.geojson
+    - assets/map/3324170008_sls.geojson
+    - assets/map/3324170009.geojson
+    - assets/map/3324170009_sls.geojson
+    - assets/map/3324170010.geojson
+    - assets/map/3324170010_sls.geojson
+    - assets/map/3324170011.geojson
+    - assets/map/3324170011_sls.geojson
+    - assets/map/3324170012.geojson
+    - assets/map/3324170012_sls.geojson
+    - assets/map/3324170013.geojson
+    - assets/map/3324170013_sls.geojson
+    - assets/map/3324170014.geojson
+    - assets/map/3324170014_sls.geojson
+    - assets/map/3324170015.geojson
+    - assets/map/3324170015_sls.geojson
+    - assets/map/3324170016.geojson
+    - assets/map/3324170016_sls.geojson
+    - assets/map/3324170017.geojson
+    - assets/map/3324170017_sls.geojson
+    - assets/map/3324170018.geojson
+    - assets/map/3324170018_sls.geojson
+    - assets/map/3324170019.geojson
+    - assets/map/3324170019_sls.geojson
+    - assets/map/3324170020.geojson
+    - assets/map/3324170020_sls.geojson
+    - assets/map/3324170_desa.geojson
+    - assets/map/3324_kec.geojson
+
+  # An image asset can refer to one or more resolution-specific "variants", see
+  # https://flutter.dev/to/resolution-aware-images
+
+  # For details regarding adding assets from package dependencies, see
+  # https://flutter.dev/to/asset-from-package
+
+  # To add custom fonts to your application, add a fonts section here,
+  # in this "flutter" section. Each entry in this list should have a
+  # "family" key with the font family name, and a "fonts" key with a
+  # list giving the asset and other descriptors for the font. For
+  # example:
+  # fonts:
+  #   - family: Schyler
+  #     fonts:
+  #       - asset: fonts/Schyler-Regular.ttf
+  #       - asset: fonts/Schyler-Italic.ttf
+  #         style: italic
+  #   - family: Trajan Pro
+  #     fonts:
+  #       - asset: fonts/TrajanPro.ttf
+  #       - asset: fonts/TrajanPro_Bold.ttf
+  #         weight: 700
+  #
+  # For details regarding fonts from package dependencies,
+  # see https://flutter.dev/to/font-from-package

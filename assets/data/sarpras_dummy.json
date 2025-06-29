@@ -1,0 +1,57 @@
+[
+  {
+    "id": 1,
+    "nama": "SD Negeri 1 Kendal",
+    "jenis": "Sekolah",
+    "sub_kategori": "SD",
+    "kecamatan": "Kendal",
+    "desa": "Patebon",
+    "tahun": "2024",
+    "latitude": -6.924,
+    "longitude": 110.204
+  },
+  {
+    "id": 2,
+    "nama": "Masjid Agung Kendal",
+    "jenis": "Tempat Ibadah",
+    "sub_kategori": "Masjid",
+    "kecamatan": "Kendal",
+    "desa": "Bugangin",
+    "tahun": "2024",
+    "latitude": -6.922,
+    "longitude": 110.21
+  },
+  {
+    "id": 3,
+    "nama": "SPBU 44.513.05",
+    "jenis": "SPBU",
+    "sub_kategori": "SPBU",
+    "kecamatan": "Brangsong",
+    "desa": "Kaliwungu",
+    "tahun": "2024",
+    "latitude": -6.92,
+    "longitude": 110.22
+  },
+  {
+    "id": 4,
+    "nama": "SMP Negeri 2 Kendal",
+    "jenis": "Sekolah",
+    "sub_kategori": "SMP",
+    "kecamatan": "Kendal",
+    "desa": "Bugangin",
+    "tahun": "2023",
+    "latitude": -6.926,
+    "longitude": 110.208
+  },
+  {
+    "id": 5,
+    "nama": "Gereja Eben Haezer",
+    "jenis": "Tempat Ibadah",
+    "sub_kategori": "Gereja",
+    "kecamatan": "Weleri",
+    "desa": "Penaruban",
+    "tahun": "2024",
+    "latitude": -6.95,
+    "longitude": 110.24
+  }
+]
