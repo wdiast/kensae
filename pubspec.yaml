@@ -96,7 +96,6 @@ flutter:
     - assets/pdf/kecamatan-kota-kendal-dalam-angka-2024.pdf
     - assets/pdf/kecamatan-weleri-dalam-angka-2024.pdf
     - assets/data/data_dummy.json
-    - assets/map/3324_kec.geojson
     - assets/map/3324010001_sls.geojson
     - assets/map/3324010002.geojson
     - assets/map/3324010002_sls.geojson

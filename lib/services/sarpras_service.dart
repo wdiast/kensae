@@ -1,15 +1,16 @@
 import 'dart:convert';
+// import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../models/sarpras_model.dart';
 import 'package:latlong2/latlong.dart';
 
 class SarprasService {
   static Future<Map<String, dynamic>> fetchSarpras({
-    // required String kodeKec,
+    required String kodeKecamatan,
     required String kodeDesa,
     required String subjectSlug,
   }) async {
-    final kodeKecamatan = kodeDesa.length >= 7 ? kodeDesa.substring(0, 7) : kodeDesa;
+    // final kodeKecamatan = kodeDesa.length >= 7 ? kodeDesa.substring(0, 7) : kodeDesa;
 
     final url =
         'https://webapps.bps.go.id/kendalkab/kensae/Dashboard_api/sarpras/$kodeKecamatan/$kodeDesa/$subjectSlug';
@@ -35,6 +36,7 @@ class SarprasService {
             popup: i < popupList.length ? popupList[i].trim() : '',
           ),
         );
+        // print("titik lokasi : $koordinatList");
       }
 
       final boxCount = int.tryParse(data['box_var'].toString()) ?? 0;

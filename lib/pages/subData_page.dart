@@ -63,9 +63,9 @@ class _SubDataPageState extends State<SubDataPage> {
       }
     }
 
-    // debugPrint('🔹 All Headers: $koloms');
-    // debugPrint('🔹 All SubHeaders: $subKoloms');
-    // debugPrint('🔹 All SubHeaders: $combined');
+    // debugPrint('All Headers: $koloms');
+    // debugPrint('All SubHeaders: $subKoloms');
+    // debugPrint('All SubHeaders: $combined');
     return combined;
   }
 
@@ -231,7 +231,7 @@ List<Map<String, dynamic>> _buildDataList(Map<String, dynamic> vData, List<Wilay
           for (var sub in subKoloms) {
             final jsonKey = buildJsonKey(kol, sub);
             final value = data[jsonKey] ?? '0';
-            print('🔍 [with subkolom] key: $jsonKey => value: $value');
+            print('[with subkolom] key: $jsonKey => value: $value');
             row[jsonKey] = value;
           }
         }
@@ -239,14 +239,14 @@ List<Map<String, dynamic>> _buildDataList(Map<String, dynamic> vData, List<Wilay
         for (var kol in koloms) {
           final simpleKey = kol.toLowerCase().replaceAll(' ', '');
           final value = data[simpleKey] ?? '0';
-          print('🔍 [no subkolom] key: $simpleKey => value: $value');
+          print('[no subkolom] key: $simpleKey => value: $value');
           row[simpleKey] = value;
         }
       }
 
       result.add(row);
     } else {
-      print('❌ Tidak ada data untuk wilayah ${wilayah.id}');
+      print('Tidak ada data untuk wilayah ${wilayah.id}');
     }
   }
 

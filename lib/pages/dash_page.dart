@@ -4,7 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
-import 'package:geojson/geojson.dart';
+// import 'package:geojson/geojson.dart';
+import 'dart:convert';
 import '../services/sarpras_service.dart';
 import '../services/wilayah_service.dart';
 import '../models/sarpras_model.dart';
@@ -46,6 +47,8 @@ class _DashPageState extends State<DashPage> {
   );
   String selectedSubject = 'Pendidikan';
 
+  List<Polygon> polygons = [];
+
   final Map<String, String> subjectSlug = {
     'Pendidikan': 'sarp-pendidikan',
     'Tempat Ibadah': 'sarp-ibadah',
@@ -60,6 +63,7 @@ class _DashPageState extends State<DashPage> {
     'ATM': 'sarp-atm',
     'Tempat Wisata': 'sarp-wisata',
   };
+
 
   @override
   void initState() {
@@ -77,7 +81,7 @@ class _DashPageState extends State<DashPage> {
       return kategoriWarna[key]!;
     }
 
-    // Kalau belum, ambil dari warna default
+    // Warna
     final defaultColors = [
       Colors.red,
       Colors.green,
@@ -119,8 +123,10 @@ class _DashPageState extends State<DashPage> {
     loadGeoJson();
   }
 
+  // Mengambil Data
   Future<void> fetchSarpras() async {
     final result = await SarprasService.fetchSarpras(
+      kodeKecamatan: selectedKecamatan.id,
       kodeDesa: selectedDesa.id,
       subjectSlug: subjectSlug[selectedSubject]!,
     );
@@ -130,33 +136,61 @@ class _DashPageState extends State<DashPage> {
       for (final item in result['statistik']) {
         statistik[item.label] = int.tryParse(item.jumlah) ?? 0;
       }
+      // sarprasList.forEach((s) {
+      //   print('Posisi: ${s.posisi.latitude}, ${s.posisi.longitude}');  // Menampilkan posisi setiap marker
+      // });
     });
   }
 
   Future<void> loadGeoJson() async {
-    final filename =
-        (selectedKecamatan.id == '3324' && selectedDesa.id == '3324')
-        ? 'assets/map/3324_kec.geojson'
-        : (selectedDesa.id != '3324'
-              ? 'assets/geojson/${selectedDesa.id}_sls.geojson'
-              : 'assets/geojson/${selectedKecamatan.id}_desa.geojson');
     try {
+      final filename =
+          (selectedKecamatan.id == '3324' && selectedDesa.id == '3324')
+              ? 'assets/map/3324_kec.geojson'
+              : (selectedKecamatan.id != '3324' && selectedDesa.id == '3324')
+                  ? 'assets/map/${selectedKecamatan.id}_desa.geojson'
+                  : 'assets/map/${selectedDesa.id}_sls.geojson';
+
       final geoStr = await rootBundle.loadString(filename);
-      final geojson = GeoJson();
-      geoJsonPolygon.clear();
-      await geojson.parse(geoStr);
-      for (final feature in geojson.features) {
-        if (feature.type == GeoJsonFeatureType.polygon) {
-          final polygon = feature.geometry as GeoJsonPolygon;
-          geoJsonPolygon.addAll(polygon.geoSeries.first.toLatLng());
+      final geojson = jsonDecode(geoStr);
+
+      print('Isi fitur GeoJSON: ${geojson['features']}');
+
+      List<Polygon> newPolygons = [];
+
+      for (var feature in geojson['features']) {
+        if (feature['geometry']['type'] == 'MultiPolygon') {
+          var multiPolygon = feature['geometry']['coordinates'];
+
+          for (var polygon in multiPolygon) {
+            List<LatLng> points = (polygon[0] as List)
+                .map<LatLng>((coord) => LatLng(coord[1], coord[0]))
+                .toList();
+
+            newPolygons.add(
+              Polygon(
+                points: points,
+                color: Colors.blue.withOpacity(0.3),
+                borderColor: Colors.blue,
+                borderStrokeWidth: 3.0,
+              ),
+            );
+          }
         }
       }
+
+      setState(() {
+        polygons = newPolygons;
+      });
     } catch (e) {
-      geoJsonPolygon = [];
+      debugPrint("Error loading GeoJSON: $e");
+      setState(() {
+        polygons = [];
+      });
     }
-    setState(() {});
   }
 
+  // Menampilkan informasi di bagian bawah jika titik di klik
   void showBottomDetail(String kategori, String popup) {
     // Ubah HTML ke bentuk teks terstruktur
     final plainText = popup
@@ -245,6 +279,7 @@ class _DashPageState extends State<DashPage> {
                             );
                             selectedDesa = filteredDesaList.first;
                           });
+                          setState(() => selectedKecamatan = val);
                           fetchSarpras();
                           loadGeoJson();
                         },
@@ -330,17 +365,8 @@ class _DashPageState extends State<DashPage> {
                 TileLayer(
                   urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                 ),
-                if (geoJsonPolygon.isNotEmpty)
-                  PolygonLayer(
-                    polygons: [
-                      Polygon(
-                        points: geoJsonPolygon,
-                        color: Colors.blue.withOpacity(0.2),
-                        borderStrokeWidth: 2,
-                        borderColor: Colors.blue,
-                      ),
-                    ],
-                  ),
+                if (polygons.isNotEmpty)
+                  PolygonLayer(polygons: polygons),
                 MarkerLayer(
                   markers: sarprasList.map((s) {
                     final color = getColorByKategori(s.kategori);
