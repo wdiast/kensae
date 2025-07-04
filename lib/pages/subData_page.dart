@@ -1,8 +1,6 @@
-// SubDataPage.dart (FIXED FILTERING + DATA DISPLAY)
 import 'package:flutter/material.dart';
 import 'package:kensae/stylesKen.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
-import '../utils/excel_export.dart';
 import '../utils/subdata_source.dart';
 import '../models/filter_model.dart';
 import '../services/filter_service.dart';
@@ -40,38 +38,140 @@ class _SubDataPageState extends State<SubDataPage> {
   }  
 
   //Konversi
-  String buildJsonKey(String kolom, String subkolom) {
-    return (kolom + '_' + subkolom).toLowerCase().replaceAll(' ', '');
-  }
-
-  List<String> getMainHeaders() {
+  List<String> getAllSubHeaders() {
     final tabel = filterParam?.fTtabel.firstWhere(
       (e) => e.id == selectedTable,
-      orElse: () =>
-          TabelOption(id: '', nama: '', dataKolom: '', dataSubKolom: ''),
+      orElse: () => TabelOption(id: '', nama: '', dataKolom: '', dataSubKolom: ''),
     );
+
+    if (tabel == null || tabel.dataKolom.isEmpty) return [];
+
+    final koloms = tabel.dataKolom.split('|').map((e) => e.trim()).toList();
+
+    if (tabel.dataSubKolom.trim().isEmpty) {
+      // Jika tidak ada subkolom, return langsung kolom
+      return koloms;
+    }
+
+    // ✅ Jika ada subkolom, gabungkan semua kolom dengan semua subkolom
+    final subKoloms = tabel.dataSubKolom.split('|').map((e) => e.trim()).toList();
+    List<String> combined = [];
+
+    for (var kol in koloms) {
+      for (var sub in subKoloms) {
+        combined.add('$kol|$sub');
+      }
+    }
+
+    // debugPrint('🔹 All Headers: $koloms');
+    // debugPrint('🔹 All SubHeaders: $subKoloms');
+    // debugPrint('🔹 All SubHeaders: $combined');
+    return combined;
+  }
+
+
+  String buildJsonKey(String kolom, String subkolom) {
+    return ('${kolom}_$subkolom').toLowerCase().replaceAll(' ', '');
+  }
+
+  List<GridColumn> buildGridColumns(bool isKecamatanMode) {
+    final tabel = filterParam?.fTtabel.firstWhere((e) => e.id == selectedTable,
+        orElse: () => TabelOption(id: '', nama: '', dataKolom: '', dataSubKolom: ''));
 
     if (tabel == null) return [];
 
-    // Jika dataSubKolom tidak kosong, pake ini trus split
-    if (tabel.dataSubKolom.trim().isNotEmpty) {
-      return tabel.dataSubKolom.split('|').map((e) => e.trim()).toList();
+    final koloms = tabel.dataKolom.split('|').map((e) => e.trim()).toList();
+    final subKoloms = tabel.dataSubKolom.trim().isNotEmpty
+        ? tabel.dataSubKolom.split('|').map((e) => e.trim()).toList()
+        : [];
+
+    List<GridColumn> columns = [
+      GridColumn(
+        columnName: isKecamatanMode ? 'nama_kecamatan' : 'nama_desa',
+        label: Container(
+          alignment: Alignment.center,
+          color: const Color(0xFFD0E8FF),
+          padding: const EdgeInsets.all(8),
+          child: Text(
+            isKecamatanMode ? 'NAMA KECAMATAN' : 'NAMA DESA',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: tableFontSize),
+          ),
+        ),
+      ),
+    ];
+
+    if (subKoloms.isNotEmpty) {
+      for (var kol in koloms) {
+        for (var sub in subKoloms) {
+          String colKey = buildJsonKey(kol, sub);
+          columns.add(GridColumn(
+            columnName: colKey,
+            label: Container(
+              alignment: Alignment.center,
+              color: const Color(0xFFD0E8FF),
+              padding: const EdgeInsets.all(8),
+              child: Text(
+                sub.toUpperCase(),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: tableFontSize),
+              ),
+            ),
+          ));
+        }
+      }
+    } else {
+      for (var kol in koloms) {
+        String key = kol.toLowerCase().replaceAll(' ', '');
+        columns.add(GridColumn(
+          columnName: key,
+          label: Container(
+            alignment: Alignment.center,
+            color: const Color(0xFFD0E8FF),
+            padding: const EdgeInsets.all(8),
+            child: Text(
+              kol.toUpperCase(),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: tableFontSize),
+            ),
+          ),
+        ));
+      }
     }
 
-    // Jika dataKolom ada '|', berarti juga perlu di-split
-    if (tabel.dataKolom.contains('|')) {
-      return tabel.dataKolom.split('|').map((e) => e.trim()).toList();
+    return columns;
+  }
+
+  List<StackedHeaderRow> buildStackedHeaderRows() {
+    if (filterParam == null || selectedTable == null) return [];
+
+    final tabel = filterParam!.fTtabel.firstWhere(
+      (e) => e.id == selectedTable,
+      orElse: () => TabelOption(id: '', nama: '', dataKolom: '', dataSubKolom: ''),
+    );
+
+    if (tabel.dataSubKolom.trim().isEmpty) return [];
+
+    final koloms = tabel.dataKolom.split('|').map((e) => e.trim()).toList();
+    final subKoloms = tabel.dataSubKolom.split('|').map((e) => e.trim()).toList();
+
+    List<StackedHeaderCell> cells = [];
+    for (var kol in koloms) {
+      final childKeys = subKoloms.map((sub) => buildJsonKey(kol, sub)).toList();
+      cells.add(StackedHeaderCell(
+        columnNames: childKeys,
+        child: Container(
+          alignment: Alignment.center,
+          color: const Color(0xFFB2D6F5),
+          padding: const EdgeInsets.all(8),
+          child: Text(
+            kol.toUpperCase(),
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: tableFontSize),
+          ),
+        ),
+      ));
     }
 
-    // Kalau tidak ada split, maka hanya satu kolom
-    return [tabel.dataKolom.trim()];
+    return [StackedHeaderRow(cells: cells)];
   }
-
-  String getSelectedTableTitle() {
-    final tabel = filterParam!.fTtabel.firstWhere((e) => e.id == selectedTable);
-    return tabel.nama;
-  }
-
+  
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -85,111 +185,80 @@ class _SubDataPageState extends State<SubDataPage> {
     fetchUpdatedData();
   }
 
-  Future<void> fetchUpdatedData() async {
-    if (selectedTable == null ||
-        selectedKecamatan == null ||
-        selectedTahun == null)
-      return;
+Future<void> fetchUpdatedData() async {
+    if (selectedTable == null || selectedKecamatan == null || selectedTahun == null) return;
     setState(() => isLoading = true);
     try {
-      final data = await FilterService.fetchFilter(
-        slug,
-        selectedTable!,
-        selectedKecamatan!,
-        selectedTahun!,
-      );
-
+      final data = await FilterService.fetchFilter(slug, selectedTable!, selectedKecamatan!, selectedTahun!);
       setState(() {
         filterParam = data;
-        currentDataList = _buildDataList(
-          data.vData,
-          _getFilteredWilayah(
-            data.fTkec,
-            data.vDesa,
-          ), // TIDAK PERLU di-mapping ulang di sini
-        );
+        currentDataList = _buildDataList(data.vData, _getFilteredWilayah(data.fTkec, data.vDesa));
         isLoading = false;
       });
     } catch (e) {
       setState(() => isLoading = false);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Gagal memperbarui data: $e')));
     }
   }
 
-  List<Wilayah> _getFilteredWilayah(
-    List<WilayahOption> listKecamatan,
-    List<Wilayah> listDesa,
-  ) {
+  List<Wilayah> _getFilteredWilayah(List<WilayahOption> listKecamatan, List<Wilayah> listDesa) {
     if (selectedKecamatan == null || selectedKecamatan == '3324') {
-      return listKecamatan
-          .map((e) => Wilayah(id: e.iddesa, nama: e.nmKec)) // nama kecamatan
-          .toList();
+      return listKecamatan.map((e) => Wilayah(id: e.iddesa, nama: e.nmKec)).toList();
     }
-
-    return listDesa
-        .where((desa) => desa.id.startsWith(selectedKecamatan!))
-        .toList(); 
+    return listDesa.where((desa) => desa.id.startsWith(selectedKecamatan!)).toList();
   }
 
-  List<Map<String, dynamic>> _buildDataList(
-    Map<String, dynamic> vData,
-    List<Wilayah> wilayahList,
-  ) {
-    final tabel = filterParam!.fTtabel.firstWhere((e) => e.id == selectedTable);
-    final headers = getMainHeaders();
-    final baseKolom = tabel.dataKolom;
-    final bool isUsingSubKolom = tabel.dataSubKolom.trim().isNotEmpty;
-    final bool isKecamatanMode =
-        selectedKecamatan == null || selectedKecamatan == '3324';
+List<Map<String, dynamic>> _buildDataList(Map<String, dynamic> vData, List<Wilayah> wilayahList) {
+  final tabel = filterParam!.fTtabel.firstWhere((e) => e.id == selectedTable);
+  final koloms = tabel.dataKolom.split('|').map((e) => e.trim()).toList();
+  final subKoloms = tabel.dataSubKolom.trim().isNotEmpty
+      ? tabel.dataSubKolom.split('|').map((e) => e.trim()).toList()
+      : [''];
+  final bool isKecamatanMode = selectedKecamatan == null || selectedKecamatan == '3324';
 
-    print('[DEBUG] headers: $headers');
-    print('[DEBUG] data_kolom: $baseKolom');
-    print('[DEBUG] data_subkolom: ${tabel.dataSubKolom}');
+  List<Map<String, dynamic>> result = [];
 
-    List<Map<String, dynamic>> result = [];
+  for (var wilayah in wilayahList) {
+    final key = wilayah.id;
+    final data = vData[key];
 
-    for (var wilayah in wilayahList) {
-      final key = wilayah.id;
-      final data = vData[key];
+    if (data != null && data is Map<String, dynamic>) {
+      final row = <String, dynamic>{
+        isKecamatanMode ? 'nama_kecamatan' : 'nama_desa': wilayah.nama,
+      };
 
-      if (data != null && data is Map<String, dynamic>) {
-        final row = <String, dynamic>{
-          isKecamatanMode ? 'nama_kecamatan' : 'nama_desa': wilayah.nama,
-        };
-
-        for (var h in headers) {
-          final jsonKey = isUsingSubKolom
-              ? buildJsonKey(baseKolom, h) // statusdaerah_kota
-              : h.toLowerCase().replaceAll(' ', ''); // misal: dataran
-
-          final value = data[jsonKey] ?? '0';
-
-          final outputKey = isUsingSubKolom
-              ? h.toLowerCase().replaceAll(' ', '_') // simpan dengan snake_case
-              : h; // simpan nama asli jika dari data_kolom
-
-          row[outputKey] = value;
-
-          print('[DEBUG] key=$jsonKey, value=$value, outputKey=$outputKey');
+      if (tabel.dataSubKolom.trim().isNotEmpty) {
+        for (var kol in koloms) {
+          for (var sub in subKoloms) {
+            final jsonKey = buildJsonKey(kol, sub);
+            final value = data[jsonKey] ?? '0';
+            print('🔍 [with subkolom] key: $jsonKey => value: $value');
+            row[jsonKey] = value;
+          }
         }
-
-        result.add(row);
       } else {
-        print('[DEBUG] Data kosong untuk wilayah id: $key');
+        for (var kol in koloms) {
+          final simpleKey = kol.toLowerCase().replaceAll(' ', '');
+          final value = data[simpleKey] ?? '0';
+          print('🔍 [no subkolom] key: $simpleKey => value: $value');
+          row[simpleKey] = value;
+        }
       }
-    }
 
-    return result;
+      result.add(row);
+    } else {
+      print('❌ Tidak ada data untuk wilayah ${wilayah.id}');
+    }
   }
 
+  return result;
+}
+
+  
   @override
   Widget build(BuildContext context) {
     final isKecamatanMode =
         selectedKecamatan == null || selectedKecamatan == '3324';
-    final mainHeaders = getMainHeaders();
-    final totalColumns = 1 + mainHeaders.length;
+    final totalColumns = 1 + getAllSubHeaders().length;
     final calculatedWidth = getCalculatedTableWidth(totalColumns);
 
     return Scaffold(
@@ -319,42 +388,42 @@ class _SubDataPageState extends State<SubDataPage> {
                             ),
                           ],
                         ),
-                        ElevatedButton.icon(
-                          icon: const Icon(Icons.download),
-                          label: const Text('Export Excel'),
-                          onPressed: () {
-                            final headers = [
-                              isKecamatanMode ? 'Nama Kecamatan' : 'Nama Desa',
-                              ...getMainHeaders(),
-                            ];
-                            final rows = currentDataList.map<List<String>>((
-                              row,
-                            ) {
-                              return [
-                                row[isKecamatanMode
-                                            ? 'nama_kecamatan'
-                                            : 'nama_desa']
-                                        ?.toString() ??
-                                    '',
-                                ...getMainHeaders().map(
-                                  (h) =>
-                                      row[h.toLowerCase().replaceAll(' ', '_')]
-                                          ?.toString() ??
-                                      '0',
-                                ),
-                              ];
-                            }).toList();
+                        // ElevatedButton.icon(
+                        //   icon: const Icon(Icons.download),
+                        //   label: const Text('Export Excel'),
+                        //   onPressed: () {
+                        //     final headers = [
+                        //       isKecamatanMode ? 'Nama Kecamatan' : 'Nama Desa',
+                        //       ...getAllSubHeaders(),
+                        //     ];
+                        //     final rows = currentDataList.map<List<String>>((
+                        //       row,
+                        //     ) {
+                        //       return [
+                        //         row[isKecamatanMode
+                        //                     ? 'nama_kecamatan'
+                        //                     : 'nama_desa']
+                        //                 ?.toString() ??
+                        //             '',
+                        //         ...getAllSubHeaders().map(
+                        //           (h) =>
+                        //               row[h.toLowerCase().replaceAll(' ', '_')]
+                        //                   ?.toString() ??
+                        //               '0',
+                        //         ),
+                        //       ];
+                        //     }).toList();
 
-                            exportToExcel(
-                              headers: headers,
-                              rows: rows,
-                              fileName: getSelectedTableTitle().replaceAll(
-                                ' ',
-                                '_',
-                              ),
-                            );
-                          },
-                        ),
+                        //     exportToExcel(
+                        //       headers: headers,
+                        //       rows: rows,
+                        //       fileName: getSelectedTableTitle().replaceAll(
+                        //         ' ',
+                        //         '_',
+                        //       ),
+                        //     );
+                        //   },
+                        // ),
                       ],
                     ),
                     const SizedBox(height: 8),
@@ -366,79 +435,11 @@ class _SubDataPageState extends State<SubDataPage> {
                           child: SizedBox(
                             width: calculatedWidth,
                             child: SfDataGrid(
-                              source: SubDataSource(
-                                currentDataList,
-                                isKecamatanMode,
-                                mainHeaders,
-                                tableFontSize,
-                              ),
+                              source: SubDataSource(currentDataList, isKecamatanMode, getAllSubHeaders(), tableFontSize),
                               allowSorting: true,
                               columnWidthMode: ColumnWidthMode.auto,
-                              columns: [
-                                GridColumn(
-                                  columnName: isKecamatanMode ? 'nama_kecamatan' : 'nama_desa',
-                                  label: Container(
-                                    alignment: Alignment.center,
-                                    color: const Color(0xFFD0E8FF),
-                                    padding: const EdgeInsets.all(8),
-                                    child: Text(
-                                      isKecamatanMode ? 'NAMA KECAMATAN' : 'NAMA DESA',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: tableFontSize,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                ...mainHeaders.map(
-                                  (h) => GridColumn(
-                                    columnName: h.toLowerCase().replaceAll(' ', '_'),
-                                    label: Container(
-                                      alignment: Alignment.center,
-                                      color: const Color(0xFFD0E8FF),
-                                      padding: const EdgeInsets.all(8),
-                                      child: Text(
-                                        h.toUpperCase(),
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: tableFontSize,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                              stackedHeaderRows: filterParam != null &&
-                                      filterParam!.fTtabel
-                                          .firstWhere((e) => e.id == selectedTable!)
-                                          .dataSubKolom
-                                          .trim()
-                                          .isNotEmpty
-                                  ? [
-                                      StackedHeaderRow(cells: [
-                                        StackedHeaderCell(
-                                          columnNames: mainHeaders
-                                              .map((e) => e.toLowerCase().replaceAll(' ', '_'))
-                                              .toList(),
-                                          child: Container(
-                                            alignment: Alignment.center,
-                                            color: const Color(0xFFB2D6F5),
-                                            padding: const EdgeInsets.all(8),
-                                            child: Text(
-                                              filterParam!.fTtabel
-                                                  .firstWhere((e) => e.id == selectedTable!)
-                                                  .dataKolom
-                                                  .toUpperCase(),
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: tableFontSize,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ]),
-                                    ]
-                                  : [],
+                              columns: buildGridColumns(isKecamatanMode),
+                              stackedHeaderRows: buildStackedHeaderRows(),
                             ),
                           ),
                         ),

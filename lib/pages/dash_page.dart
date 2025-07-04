@@ -1,9 +1,14 @@
+// pages/dash_page.dart (versi final dengan filter dinamis + peta interaktif)
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:geojson/geojson.dart';
+import '../services/sarpras_service.dart';
+import '../services/wilayah_service.dart';
+import '../models/sarpras_model.dart';
+import '../models/wilayah_model.dart';
 
 class DashPage extends StatefulWidget {
   const DashPage({super.key});
@@ -13,131 +18,190 @@ class DashPage extends StatefulWidget {
 }
 
 class _DashPageState extends State<DashPage> {
-  List<String> kecamatanList = ['Semua', 'Kendal', 'Brangsong']; // contoh
-  List<String> desaList = ['Semua', 'Desa A', 'Desa B'];
-  List<String> subjectList = [
-    'Pendidikan',
-    'Tempat Ibadah',
-    'Kesehatan',
-    'Pasar',
-    'SPBU',
-    'Alfamart',
-    'Indomart',
-    'Perbankan',
-    'Pemerintahan',
-    'Hotel',
-    'ATM',
-    'Tempat Wisata'
-  ];
+  List<KecamatanOption> kecamatanList = [];
+  List<DesaOption> desaList = [];
+  List<DesaOption> filteredDesaList = [];
+  List<SarprasMarker> sarprasList = [];
+  Map<String, int> statistik = {};
+  List<LatLng> geoJsonPolygon = [];
 
-  String selectedKecamatan = 'Semua';
-  String selectedDesa = 'Semua';
+  final KecamatanOption semuaKecamatan = KecamatanOption(
+    id: '3324',
+    nama: 'Semua Kecamatan',
+  );
+  final DesaOption semuaDesa = DesaOption(
+    id: '3324',
+    nama: 'Semua Desa',
+    idKecamatan: '3324',
+  );
+
+  KecamatanOption selectedKecamatan = KecamatanOption(
+    id: '3324',
+    nama: 'Semua Kecamatan',
+  );
+  DesaOption selectedDesa = DesaOption(
+    id: '3324',
+    nama: 'Semua Desa',
+    idKecamatan: '3324',
+  );
   String selectedSubject = 'Pendidikan';
 
-  List<LatLng> geoJsonPolygon = [];
-  List<Map<String, dynamic>> sarprasList = [];
-  Map<String, int> statistik = {};
+  final Map<String, String> subjectSlug = {
+    'Pendidikan': 'sarp-pendidikan',
+    'Tempat Ibadah': 'sarp-ibadah',
+    'Kesehatan': 'sarp-kesehatan',
+    'Pasar': 'sarp-pasar',
+    'SPBU': 'sarp-spbu',
+    'Alfamart': 'sarp-alfamart',
+    'Indomart': 'sarp-indomart',
+    'Perbankan': 'sarp-perbankan',
+    'Pemerintahan': 'sarp-pemerintahan',
+    'Hotel': 'sarp-hotel',
+    'ATM': 'sarp-atm',
+    'Tempat Wisata': 'sarp-wisata',
+  };
 
   @override
   void initState() {
     super.initState();
-    loadGeoJsonForKecamatan(selectedKecamatan);
-    loadMockData();
+    fetchWilayah();
   }
 
-  Future<void> loadGeoJsonForKecamatan(String kecamatan) async {
-    geoJsonPolygon.clear();
+  final Map<String, Color> kategoriWarna = {};
 
-    if (kecamatan == 'Semua') {
-      setState(() {}); // kosongkan tampilan poligon
-      return;
+  Color getColorByKategori(String kategori) {
+    final key = kategori.toUpperCase();
+
+    // Cek apakah kategori sudah punya warna
+    if (kategoriWarna.containsKey(key)) {
+      return kategoriWarna[key]!;
     }
 
-    final filePath = 'assets/map/kecamatan_${kecamatan.toLowerCase()}.geojson';
-    try {
-      final geojsonStr = await rootBundle.loadString(filePath);
-      final geojson = GeoJson();
-      await geojson.parse(geojsonStr);
+    // Kalau belum, ambil dari warna default
+    final defaultColors = [
+      Colors.red,
+      Colors.green,
+      Colors.blue,
+      Colors.orange,
+      Colors.purple,
+      Colors.teal,
+      Colors.brown,
+      Colors.cyan,
+      Colors.indigo,
+      Colors.pink,
+      Colors.lime,
+    ];
 
+    final nextColor =
+        defaultColors[kategoriWarna.length % defaultColors.length];
+    kategoriWarna[key] = nextColor;
+    return nextColor;
+  }
+
+  Future<void> fetchWilayah() async {
+    final data = await WilayahService.fetchWilayah(
+      kodeKecamatan: '3324',
+      kodeDesa: '3324',
+      subjectSlug: subjectSlug[selectedSubject]!,
+    );
+    setState(() {
+      kecamatanList = [
+        semuaKecamatan,
+        ...data['kecamatan']!.cast<KecamatanOption>(),
+      ];
+      desaList = data['desa']!.cast<DesaOption>();
+
+      filteredDesaList = [semuaDesa];
+      selectedKecamatan = semuaKecamatan;
+      selectedDesa = semuaDesa;
+    });
+    fetchSarpras();
+    loadGeoJson();
+  }
+
+  Future<void> fetchSarpras() async {
+    final result = await SarprasService.fetchSarpras(
+      kodeDesa: selectedDesa.id,
+      subjectSlug: subjectSlug[selectedSubject]!,
+    );
+    setState(() {
+      sarprasList = result['markers'];
+      statistik = {};
+      for (final item in result['statistik']) {
+        statistik[item.label] = int.tryParse(item.jumlah) ?? 0;
+      }
+    });
+  }
+
+  Future<void> loadGeoJson() async {
+    final filename =
+        (selectedKecamatan.id == '3324' && selectedDesa.id == '3324')
+        ? 'assets/map/3324_kec.geojson'
+        : (selectedDesa.id != '3324'
+              ? 'assets/geojson/${selectedDesa.id}_sls.geojson'
+              : 'assets/geojson/${selectedKecamatan.id}_desa.geojson');
+    try {
+      final geoStr = await rootBundle.loadString(filename);
+      final geojson = GeoJson();
+      geoJsonPolygon.clear();
+      await geojson.parse(geoStr);
       for (final feature in geojson.features) {
         if (feature.type == GeoJsonFeatureType.polygon) {
           final polygon = feature.geometry as GeoJsonPolygon;
-          final coords = polygon.geoSeries.first.toLatLng();
-          geoJsonPolygon.addAll(coords);
+          geoJsonPolygon.addAll(polygon.geoSeries.first.toLatLng());
         }
       }
     } catch (e) {
-      debugPrint("GeoJSON load error: $e");
+      geoJsonPolygon = [];
     }
-
     setState(() {});
   }
 
-  Future<void> loadMockData() async {
-    sarprasList = [
-      {
-        'id': 1,
-        'nama': 'SDN 01',
-        'jenis': 'SD',
-        'subject': 'Pendidikan',
-        'kecamatan': 'Kendal',
-        'desa': 'Desa A',
-        'lat': -6.922,
-        'lng': 110.203,
-      },
-      {
-        'id': 2,
-        'nama': 'SMPN 01',
-        'jenis': 'SMP',
-        'subject': 'Pendidikan',
-        'kecamatan': 'Kendal',
-        'desa': 'Desa A',
-        'lat': -6.925,
-        'lng': 110.208,
-      },
-      {
-        'id': 3,
-        'nama': 'SMAN 01',
-        'jenis': 'SMA',
-        'subject': 'Pendidikan',
-        'kecamatan': 'Kendal',
-        'desa': 'Desa B',
-        'lat': -6.928,
-        'lng': 110.213,
-      },
-    ];
-    updateStatistik();
-  }
+  void showBottomDetail(String kategori, String popup) {
+    // Ubah HTML ke bentuk teks terstruktur
+    final plainText = popup
+        .replaceAll(RegExp(r'<[^>]*>'), '') // Hapus semua tag HTML
+        .replaceAll(':', ': ') // Spasi setelah titik dua
+        .replaceAll(RegExp(r'\s+'), ' ') // Hapus spasi berlebihan
+        .replaceAll('Jenis', '\nJenis')
+        .replaceAll('Kepemilikan', '\nKepemilikan')
+        .replaceAll('Alamat', '\nAlamat');
 
-  void updateStatistik() {
-    final filtered = sarprasList.where((e) =>
-        (selectedKecamatan == 'Semua' || e['kecamatan'] == selectedKecamatan) &&
-        (selectedDesa == 'Semua' || e['desa'] == selectedDesa) &&
-        (e['subject'] == selectedSubject)).toList();
-
-    final stat = <String, int>{};
-    for (final item in filtered) {
-      final jenis = item['jenis'];
-      stat[jenis] = (stat[jenis] ?? 0) + 1;
-    }
-
-    setState(() {
-      statistik = stat;
-    });
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(16),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                kategori,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                plainText,
+                style: const TextStyle(fontSize: 16, height: 1.4),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final filteredMarkers = sarprasList.where((e) =>
-        (selectedKecamatan == 'Semua' || e['kecamatan'] == selectedKecamatan) &&
-        (selectedDesa == 'Semua' || e['desa'] == selectedDesa) &&
-        (e['subject'] == selectedSubject)).toList();
-
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Peta Sarpras'),
-        backgroundColor: const Color(0xFF0148A4),
-      ),
+      appBar: AppBar(title: const Text('Peta Sarpras')),
       body: Column(
         children: [
           Container(
@@ -148,72 +212,124 @@ class _DashPageState extends State<DashPage> {
                 Row(
                   children: [
                     Expanded(
-                      child: buildDropdown2('Kecamatan', kecamatanList, selectedKecamatan, (v) {
-                        setState(() {
-                          selectedKecamatan = v;
-                          selectedDesa = 'Semua';
-                        });
-                        updateStatistik();
-                        loadGeoJsonForKecamatan(v);
-                      }),
+                      child: DropdownButtonFormField2<KecamatanOption>(
+                        isExpanded: true,
+                        decoration: const InputDecoration(
+                          labelText: 'Kecamatan',
+                          border: OutlineInputBorder(),
+                        ),
+                        value: selectedKecamatan,
+                        items: kecamatanList
+                            .map(
+                              (item) => DropdownMenuItem(
+                                value: item,
+                                child: Text(item.nama),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (val) {
+                          if (val == null) return;
+                          setState(() {
+                            selectedKecamatan = val;
+                            filteredDesaList = desaList
+                                .where((d) => d.idKecamatan == val.id)
+                                .toList();
+
+                            filteredDesaList.insert(
+                              0,
+                              DesaOption(
+                                id: '3324',
+                                nama: 'Semua Desa',
+                                idKecamatan: val.id,
+                              ),
+                            );
+                            selectedDesa = filteredDesaList.first;
+                          });
+                          fetchSarpras();
+                          loadGeoJson();
+                        },
+                      ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: buildDropdown2('Desa', desaList, selectedDesa, (v) {
-                        setState(() => selectedDesa = v);
-                        updateStatistik();
-                      }),
+                      child: DropdownButtonFormField2<DesaOption>(
+                        isExpanded: true,
+                        decoration: const InputDecoration(
+                          labelText: 'Desa',
+                          border: OutlineInputBorder(),
+                        ),
+                        value: selectedDesa,
+                        items: filteredDesaList
+                            .map(
+                              (item) => DropdownMenuItem(
+                                value: item,
+                                child: Text(item.nama),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (val) {
+                          if (val == null) return;
+                          setState(() => selectedDesa = val);
+                          fetchSarpras();
+                          loadGeoJson();
+                        },
+                      ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: buildDropdown2('Subject', subjectList, selectedSubject, (v) {
-                        setState(() => selectedSubject = v);
-                        updateStatistik();
-                      }),
-                    ),
-                  ],
+                DropdownButtonFormField2<String>(
+                  isExpanded: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Kategori',
+                    border: OutlineInputBorder(),
+                  ),
+                  value: selectedSubject,
+                  items: subjectSlug.keys
+                      .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                      .toList(),
+                  onChanged: (val) {
+                    if (val == null) return;
+                    setState(() => selectedSubject = val);
+                    fetchSarpras();
+                  },
                 ),
               ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(8),
-            child: Row(
+          SizedBox(
+            height: 90,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
               children: statistik.entries.map((e) {
-                return Expanded(
-                  child: Card(
-                    child: ListTile(
-                      leading: const Icon(Icons.home, size: 25),
-                      title: Text('Jumlah ${e.key}', style: const TextStyle(fontSize: 10)),
-                      subtitle: Text('${e.value}'),
+                return Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          e.key,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          '${e.value}',
+                          style: const TextStyle(fontSize: 18),
+                        ),
+                      ],
                     ),
                   ),
                 );
               }).toList(),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Lokasi ${selectedSubject} di Kecamatan ${selectedKecamatan == 'Semua' ? 'Seluruh Wilayah' : selectedKecamatan}',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-          ),
           Expanded(
             child: FlutterMap(
-              options: MapOptions(
-                center: LatLng(-6.922, 110.203),
-                zoom: 10.5,
-              ),
+              options: MapOptions(center: LatLng(-7.05, 110.2), zoom: 10.5),
               children: [
-                TileLayer(urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'),
+                TileLayer(
+                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                ),
                 if (geoJsonPolygon.isNotEmpty)
                   PolygonLayer(
                     polygons: [
@@ -222,16 +338,20 @@ class _DashPageState extends State<DashPage> {
                         color: Colors.blue.withOpacity(0.2),
                         borderStrokeWidth: 2,
                         borderColor: Colors.blue,
-                      )
+                      ),
                     ],
                   ),
                 MarkerLayer(
-                  markers: filteredMarkers.map((s) {
+                  markers: sarprasList.map((s) {
+                    final color = getColorByKategori(s.kategori);
                     return Marker(
                       width: 30,
                       height: 30,
-                      point: LatLng(s['lat'], s['lng']),
-                      builder: (_) => const Icon(Icons.location_on, color: Colors.red),
+                      point: s.posisi,
+                      builder: (_) => GestureDetector(
+                        onTap: () => showBottomDetail(s.kategori, s.popup),
+                        child: Icon(Icons.location_on, color: color),
+                      ),
                     );
                   }).toList(),
                 ),
@@ -247,7 +367,7 @@ class _DashPageState extends State<DashPage> {
         type: BottomNavigationBarType.fixed,
         onTap: (index) {
           if (index == 0) Navigator.pushNamed(context, '/');
-          if (index == 1) {} // stay
+          if (index == 1) {}
           if (index == 2) Navigator.pushNamed(context, '/tentang');
           if (index == 3) Navigator.pushNamed(context, '/data');
           if (index == 4) Navigator.pushNamed(context, '/profil');
@@ -260,25 +380,6 @@ class _DashPageState extends State<DashPage> {
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
         ],
       ),
-    );
-  }
-
-  Widget buildDropdown2(String label, List<String> items, String selected, Function(String) onChanged) {
-    return DropdownButtonFormField2<String>(
-      isExpanded: true,
-      value: selected,
-      decoration: InputDecoration(
-        labelText: label,
-        border: const OutlineInputBorder(),
-        contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-      ),
-      onChanged: (val) {
-        if (val != null) {
-          onChanged(val);
-        }
-      },
-      items: items.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
-      buttonStyleData: const ButtonStyleData(height: 48),
     );
   }
 }

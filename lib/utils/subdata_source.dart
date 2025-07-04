@@ -17,10 +17,24 @@ class SubDataSource extends DataGridSource {
           columnName: isKecamatanMode ? 'nama_kecamatan' : 'nama_desa',
           value: row[isKecamatanMode ? 'nama_kecamatan' : 'nama_desa'] ?? '',
         ),
-        ...headers.map((h) => DataGridCell<String>(
-              columnName: h.toLowerCase().replaceAll(' ', '_'),
-              value: row[h.toLowerCase().replaceAll(' ', '_')] ?? '0',
-            )),
+        ...headers.map((h) {
+          final parts = h.split('|');
+
+          // Jika ada 2 bagian, ambil subkolom saja (contoh: 'Status|Kota' → 'kota')
+          // Jika tidak, langsung pakai nama kolom (contoh: 'Jumlah Kepala Keluarga')
+          final jsonKey = parts.length == 2
+              ? '${parts[0]}_${parts[1]}'.toLowerCase().replaceAll(' ', '')
+              : h.toLowerCase().replaceAll(' ', '');
+
+
+          // log debug
+          print('[DEBUG] Header: "$h" → JSON Key: "$jsonKey" → Value: ${row[jsonKey]}');
+
+          return DataGridCell<String>(
+            columnName: h, // biarkan kolom tetap readable
+            value: row[jsonKey]?.toString() ?? '0',
+          );
+        }),
       ]);
     }).toList();
   }
@@ -43,6 +57,4 @@ class SubDataSource extends DataGridSource {
       }).toList(),
     );
   }
-
-  
 }

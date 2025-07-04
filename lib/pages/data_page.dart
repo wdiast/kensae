@@ -13,8 +13,8 @@ class DataPage extends StatelessWidget {
       {'title': 'Kependudukan', 'icon': Icons.people, 'slug':'kependudukan','def':'0101'},
       {'title': 'Tenaga Kerja', 'icon': Icons.work,'slug':'tenaga','def':'0501'},
       {'title': 'Perdagangan', 'icon': Icons.store,'slug':'perdagangan','def':'0404'},
-      {'title': 'Pendidikan', 'icon': Icons.school,'slug':'pendidikan','def':'0201'},
-      {'title': 'Kesehatan', 'icon': Icons.local_hospital,'slug':'kesehatan','def':'0301'},
+      {'title': 'Pendidikan', 'icon': Icons.school,'slug':'pendidikan','def':'0202'},
+      {'title': 'Kesehatan', 'icon': Icons.local_hospital,'slug':'kesehatan','def':'0302'},
       {'title': 'Pertanian', 'icon': Icons.agriculture,'slug':'pertanian','def':'0802'},
     ];
     return Scaffold(
