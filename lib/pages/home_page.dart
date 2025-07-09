@@ -30,13 +30,7 @@ class _HomePageState extends State<HomePage> {
   Widget buildStat(String number, String label) {
     return Column(
       children: [
-        Text(number,
-            style: const TextStyle(
-              color:Color(0xFF1E56A0), 
-              fontSize: 24, 
-              fontWeight: FontWeight.bold
-            )
-        ),
+        Text(number,style: titleTextStyle),
         const SizedBox(height: 4),
         Text(label, style: const TextStyle(fontSize: 14)),
       ],
@@ -140,9 +134,9 @@ class _HomePageState extends State<HomePage> {
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                   children: [
-                                    buildStat("269", "Desa"),
-                                    buildStat("1,112k", "Populasi"),
-                                    buildStat("122k", "Penerima Bantuan"),
+                                    buildStat("286", "Desa/Kelurahan"),
+                                    buildStat("1,064,812", "Penduduk"),
+                                    buildStat("1022.23", "Luas Wilayah (km²)"),
                                   ],
                                 ),
                                 const SizedBox(height: 20),

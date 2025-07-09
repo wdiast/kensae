@@ -7,7 +7,7 @@ class FilterService {
     const String baseUrl = 'https://webapps.bps.go.id/kendalkab/kensae/Data_api'; 
     final url = Uri.parse('$baseUrl/$slug/$fTabel/$fKec/$fTahun');
 
-    print('[DEBUG] Fetching URL: $url'); // ✅ DEBUG LINE
+    print('[DEBUG] Fetching URL: $url'); // Mengecek url api
     
     final response = await http.get(url);
     

@@ -5,6 +5,7 @@ import '../utils/subdata_source.dart';
 import '../models/filter_model.dart';
 import '../services/filter_service.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
+import '../utils/func.dart';
 
 class SubDataPage extends StatefulWidget {
   const SubDataPage({super.key});
@@ -37,7 +38,7 @@ class _SubDataPageState extends State<SubDataPage> {
     return (columnCount * baseColumnWidth) + padding;
   }  
 
-  //Konversi
+  //Mendapatkan Header
   List<String> getAllSubHeaders() {
     final tabel = filterParam?.fTtabel.firstWhere(
       (e) => e.id == selectedTable,
@@ -47,13 +48,14 @@ class _SubDataPageState extends State<SubDataPage> {
     if (tabel == null || tabel.dataKolom.isEmpty) return [];
 
     final koloms = tabel.dataKolom.split('|').map((e) => e.trim()).toList();
+    final isKategoriPendidikan = slug.toLowerCase().contains('pendidikan');
 
     if (tabel.dataSubKolom.trim().isEmpty) {
       // Jika tidak ada subkolom, return langsung kolom
-      return koloms;
+      return [...koloms, if (!isKategoriPendidikan) 'jumlah'];
     }
 
-    // ✅ Jika ada subkolom, gabungkan semua kolom dengan semua subkolom
+    // Jika ada subkolom, gabungkan semua kolom dengan semua subkolom
     final subKoloms = tabel.dataSubKolom.split('|').map((e) => e.trim()).toList();
     List<String> combined = [];
 
@@ -66,12 +68,22 @@ class _SubDataPageState extends State<SubDataPage> {
     // debugPrint('All Headers: $koloms');
     // debugPrint('All SubHeaders: $subKoloms');
     // debugPrint('All SubHeaders: $combined');
-    return combined;
+    return [...combined, if (!isKategoriPendidikan) 'jumlah'];
   }
 
 
   String buildJsonKey(String kolom, String subkolom) {
-    return ('${kolom}_$subkolom').toLowerCase().replaceAll(' ', '');
+    final cleanKolom = kolom.split('/').first.trim();
+    final cleanSubkolom = subkolom.split('/').first.trim();
+
+    debugPrint('Clean Kolom: $cleanKolom');  // Debug print
+    debugPrint('Clean Subkolom: $cleanSubkolom');  // Debug print
+
+
+    String clean(String input) =>
+        input.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
+
+    return '${clean(cleanKolom)}_${clean(cleanSubkolom)}';
   }
 
   List<GridColumn> buildGridColumns(bool isKecamatanMode) {
@@ -84,6 +96,8 @@ class _SubDataPageState extends State<SubDataPage> {
     final subKoloms = tabel.dataSubKolom.trim().isNotEmpty
         ? tabel.dataSubKolom.split('|').map((e) => e.trim()).toList()
         : [];
+
+    final isKategoriPendidikan = slug.toLowerCase().contains('pendidikan');
 
     List<GridColumn> columns = [
       GridColumn(
@@ -134,6 +148,23 @@ class _SubDataPageState extends State<SubDataPage> {
           ),
         ));
       }
+    }
+
+    if (!isKategoriPendidikan) {
+      columns.add(
+        GridColumn(
+          columnName: 'jumlah',
+          label: Container(
+            alignment: Alignment.center,
+            color: const Color(0xFFD0E8FF),
+            padding: const EdgeInsets.all(8),
+            child: Text(
+              'JUMLAH',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: tableFontSize),
+            ),
+          ),
+        ),
+      );
     }
 
     return columns;
@@ -194,6 +225,7 @@ Future<void> fetchUpdatedData() async {
         filterParam = data;
         currentDataList = _buildDataList(data.vData, _getFilteredWilayah(data.fTkec, data.vDesa));
         isLoading = false;
+        debugPrint("Current Data List : $currentDataList");
       });
     } catch (e) {
       setState(() => isLoading = false);
@@ -214,6 +246,7 @@ List<Map<String, dynamic>> _buildDataList(Map<String, dynamic> vData, List<Wilay
       ? tabel.dataSubKolom.split('|').map((e) => e.trim()).toList()
       : [''];
   final bool isKecamatanMode = selectedKecamatan == null || selectedKecamatan == '3324';
+  final bool isKategoriPendidikan = slug.toLowerCase().contains('pendidikan');
 
   List<Map<String, dynamic>> result = [];
 
@@ -226,6 +259,8 @@ List<Map<String, dynamic>> _buildDataList(Map<String, dynamic> vData, List<Wilay
         isKecamatanMode ? 'nama_kecamatan' : 'nama_desa': wilayah.nama,
       };
 
+      double total = 0;
+
       if (tabel.dataSubKolom.trim().isNotEmpty) {
         for (var kol in koloms) {
           for (var sub in subKoloms) {
@@ -233,17 +268,23 @@ List<Map<String, dynamic>> _buildDataList(Map<String, dynamic> vData, List<Wilay
             final value = data[jsonKey] ?? '0';
             print('[with subkolom] key: $jsonKey => value: $value');
             row[jsonKey] = value;
+            total += double.tryParse(value.toString()) ?? 0;
           }
         }
       } else {
         for (var kol in koloms) {
-          final simpleKey = kol.toLowerCase().replaceAll(' ', '');
-          final value = data[simpleKey] ?? '0';
+          final simpleKey = kol.toLowerCase().split('/').first.trim().replaceAll(' ', '');
+          var value = data[simpleKey] ?? '0';
+
           print('[no subkolom] key: $simpleKey => value: $value');
           row[simpleKey] = value;
+          total += double.tryParse(value.toString()) ?? 0;
         }
       }
 
+      if (!isKategoriPendidikan) {
+          row['jumlah'] = total.toInt();
+      }
       result.add(row);
     } else {
       print('Tidak ada data untuk wilayah ${wilayah.id}');
@@ -252,7 +293,6 @@ List<Map<String, dynamic>> _buildDataList(Map<String, dynamic> vData, List<Wilay
 
   return result;
 }
-
   
   @override
   Widget build(BuildContext context) {
@@ -299,6 +339,7 @@ List<Map<String, dynamic>> _buildDataList(Map<String, dynamic> vData, List<Wilay
                       value: selectedTable,
                       isExpanded: true,
                       items: filterParam?.fTtabel
+                          .where((e) => e.id != '0102')
                           .map(
                             (e) => DropdownMenuItem(
                               value: e.id,
@@ -388,42 +429,45 @@ List<Map<String, dynamic>> _buildDataList(Map<String, dynamic> vData, List<Wilay
                             ),
                           ],
                         ),
-                        // ElevatedButton.icon(
-                        //   icon: const Icon(Icons.download),
-                        //   label: const Text('Export Excel'),
-                        //   onPressed: () {
-                        //     final headers = [
-                        //       isKecamatanMode ? 'Nama Kecamatan' : 'Nama Desa',
-                        //       ...getAllSubHeaders(),
-                        //     ];
-                        //     final rows = currentDataList.map<List<String>>((
-                        //       row,
-                        //     ) {
-                        //       return [
-                        //         row[isKecamatanMode
-                        //                     ? 'nama_kecamatan'
-                        //                     : 'nama_desa']
-                        //                 ?.toString() ??
-                        //             '',
-                        //         ...getAllSubHeaders().map(
-                        //           (h) =>
-                        //               row[h.toLowerCase().replaceAll(' ', '_')]
-                        //                   ?.toString() ??
-                        //               '0',
-                        //         ),
-                        //       ];
-                        //     }).toList();
+                        ElevatedButton.icon(
+                          icon: const Icon(Icons.download),
+                          label: const Text('Export Excel'),
+                          onPressed: () async {
+                            final headers = [isKecamatanMode ? 'Nama Kecamatan' : 'Nama Desa',
+                            ...getAllSubHeaders()]; // Mendapatkan header yang sesuai dengan tabel
+                            final rows = currentDataList.map<List<String>>((row) {
+                              final wilayahName = row[isKecamatanMode ? 'nama_kecamatan' : 'nama_desa']?.toString() ?? '';
+                              return [
+                                wilayahName,
+                                ...getAllSubHeaders().map((header) {
+                                  final key = generateJsonKey(header);
+                                  return row[key]?.toString() ?? '0';
+                                })
+                              ];
+                            }).toList();
 
-                        //     exportToExcel(
-                        //       headers: headers,
-                        //       rows: rows,
-                        //       fileName: getSelectedTableTitle().replaceAll(
-                        //         ' ',
-                        //         '_',
-                        //       ),
-                        //     );
-                        //   },
-                        // ),
+                            final subDataSource = SubDataSource(
+                              currentDataList,
+                              isKecamatanMode,
+                              headers,
+                              tableFontSize,
+                            );
+
+                            final namaTabel = filterParam?.fTtabel
+                                .firstWhere((e) => e.id == selectedTable, orElse: () => TabelOption(id: '', nama: 'Tabel', dataKolom: '', dataSubKolom: ''))
+                                .nama;
+
+                            // Memanggil fungsi exportToExcel untuk mengekspor data
+                            await subDataSource.exportToExcel(headers, rows, namaTabel ?? 'Export_Table');
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Tabel berhasil di-download'),
+                                duration: Duration(seconds: 2),
+                              ),
+                            );
+                          },
+                        ),
                       ],
                     ),
                     const SizedBox(height: 8),

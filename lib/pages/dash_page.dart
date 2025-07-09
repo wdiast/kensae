@@ -170,7 +170,7 @@ class _DashPageState extends State<DashPage> {
             newPolygons.add(
               Polygon(
                 points: points,
-                color: Colors.blue.withOpacity(0.3),
+                color: Color(0x4D2196F3),
                 borderColor: Colors.blue,
                 borderStrokeWidth: 3.0,
               ),
