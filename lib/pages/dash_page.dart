@@ -364,6 +364,7 @@ class _DashPageState extends State<DashPage> {
               children: [
                 TileLayer(
                   urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  userAgentPackageName: 'com.example.kensae',
                 ),
                 if (polygons.isNotEmpty)
                   PolygonLayer(polygons: polygons),
